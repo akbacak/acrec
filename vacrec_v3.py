@@ -65,21 +65,21 @@ print(np.shape(X))
 X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2 ,random_state=43)
 
 batch_size = 4
-epochs = 16
+epochs = 32
 
 
 
-video = keras.Input(shape=(15, 224, 224, 3), name='video')
+video = keras.Input(shape = (X.shape[1] , X.shape[2] , X.shape[3] , X.shape[4]), name='video')
 
 cnn = InceptionV3(weights='imagenet',include_top=False, pooling='avg')
 cnn.trainable =False
 
 frame_features = layers.TimeDistributed(cnn)(video)
-blstm_1=Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, input_shape=(X.shape[1], X.shape[2]), return_sequences =True))(frame_features)
-blstm_2=Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, input_shape=(X.shape[1], X.shape[2]), return_sequences =False))(blstm_1)
-Dense_2   = Dense(128, activation = 'sigmoid' )(blstm_2)
+blstm_1 = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences= True))(frame_features)
+blstm_2 = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences= False))(blstm_1)
+Dense_2   = Dense(256, activation = 'sigmoid' )(blstm_2)
 batchNorm = BatchNormalization()(Dense_2)
-enver   = Dense(8, activation = 'sigmoid')(batchNorm)
+enver   = Dense(32, activation = 'sigmoid')(batchNorm)
 batchNorm2= BatchNormalization()(enver)
 Dense_3   = Dense(4, activation='sigmoid')(batchNorm2)
 model = keras.models.Model(input = video , output = Dense_3)
@@ -87,7 +87,7 @@ print(model.summary())
 
 
 from keras.optimizers import SGD
-sgd = SGD(lr=0.01, decay = 1e-3, momentum=0.9, nesterov=True)
+sgd = SGD(lr=0.002, decay = 1e-5, momentum=0.9, nesterov=True)
 
 model.compile(loss = 'binary_crossentropy',  optimizer=sgd, metrics=['accuracy'])
 history = model.fit(X_train, Y_train, shuffle=True, batch_size=batch_size,epochs=epochs,verbose=1, validation_data=(X_valid, Y_valid) )
@@ -119,7 +119,7 @@ plt.legend( ['train', 'validation'], loc='upper left')
 plt.show()
 
 
-
+'''
 score = model.evaluate(X_train, Y_train)
 print(model.metrics_names)
 print(score)
@@ -132,6 +132,6 @@ score = model.evaluate(X, Y)
 print(model.metrics_names)
 print(score)
 
-
+'''
 
 
