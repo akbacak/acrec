@@ -58,22 +58,19 @@ X.shape
 print(np.shape(X))
 X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2 ,random_state=43)
 
-batch_size = 8
+batch_size = 2
 epochs = 120
 
 
 video = keras.Input(shape = (X.shape[1], X.shape[2] , X.shape[3] , X.shape[4]), name='video')
-conv_1 = TimeDistributed(Conv2D(32, (3,3), activation='relu'))(video)
-conv_2 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_1)
-max_p1 = TimeDistributed(MaxPooling2D(2))(conv_2)
-conv_3 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(max_p1)
-conv_4 = TimeDistributed(Conv2D(128, (3,3), activation='relu'))(conv_3)
-max_p2 = TimeDistributed(MaxPooling2D(2))(conv_4)
-conv_5 = TimeDistributed(Conv2D(128, (3,3), activation='relu'))(max_p2)
-conv_6 = TimeDistributed(Conv2D(256, (3,3), activation='relu'))(conv_5)
-flat    = TimeDistributed(Flatten())(conv_6)
-Dense   = Dense(2048, activation = 'sigmoid' )(flat)
-blstm_1   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = True  ))(Dense)
+conv_1 = TimeDistributed(SeparableConv2D(32, (3,3), activation='relu'))(video)
+conv_2 = TimeDistributed(SeparableConv2D(64, (3,3), activation='relu'))(conv_1)
+conv_3 = TimeDistributed(SeparableConv2D(64, (3,3), activation='relu'))(conv_2)
+conv_4 = TimeDistributed(SeparableConv2D(128, (3,3), activation='relu'))(conv_3)
+conv_5 = TimeDistributed(SeparableConv2D(128, (3,3), activation='relu'))(conv_4)
+conv_6 = TimeDistributed(SeparableConv2D(256, (3,3), activation='relu'))(conv_5)
+flat   = TimeDistributed(GlobalAveragePooling2D())(conv_6)
+blstm_1   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = True  ))(flat)
 blstm_2   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = False ))(blstm_1)
 Dense_2   = Dense(256, activation = 'sigmoid' )(blstm_2)
 batchNorm = BatchNormalization()(Dense_2)
@@ -85,7 +82,7 @@ print(model.summary())
 
 
 from keras.optimizers import SGD
-sgd = SGD(lr=0.01, decay = 1e-3, momentum=0.9, nesterov=True)
+sgd = SGD(lr=0.001, decay = 1e-3, momentum=0.9, nesterov=True)
 
 model.compile(loss = 'binary_crossentropy',  optimizer=sgd, metrics=['accuracy'])
 history = model.fit(X_train, Y_train, shuffle=True, batch_size=batch_size,epochs=epochs,verbose=1, validation_data=(X_valid, Y_valid) )
