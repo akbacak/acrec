@@ -69,7 +69,7 @@ epochs = 32
 
 
 
-video = keras.Input(shape = (X.shape[1] , X.shape[2] , X.shape[3] , X.shape[4]), name='video')
+video = keras.Input(shape = (X.shape[1], X.shape[2] , X.shape[3] , X.shape[4]), name='video')
 
 cnn = InceptionV3(weights='imagenet',include_top=False, pooling='avg')
 cnn.trainable =False
