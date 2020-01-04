@@ -63,14 +63,15 @@ epochs = 120
 
 
 video = keras.Input(shape = (X.shape[1], X.shape[2] , X.shape[3] , X.shape[4]), name='video')
-conv_1 = TimeDistributed(Conv2D(32, (3,3), activation='relu'))(video)
-conv_2 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_1)
-conv_3 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_2)
-conv_4 = TimeDistributed(Conv2D(128, (3,3), activation='relu'))(conv_3)
-conv_5 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_4)
-conv_6 = TimeDistributed(Conv2D(128, (3,3), activation='relu'))(conv_5)
+conv_1 = TimeDistributed(SeparableConv2D(32, (3,3), activation='relu'))(video)
+conv_2 = TimeDistributed(SeparableConv2D(64, (3,3), activation='relu'))(conv_1)
+max_p1 = TimeDistributed(MaxPooling2D(2))(conv_2)
+conv_3 = TimeDistributed(SeparableConv2D(64, (3,3), activation='relu'))(max_p1)
+conv_4 = TimeDistributed(SeparableConv2D(128, (3,3), activation='relu'))(conv_3)
+max_p2 = TimeDistributed(MaxPooling2D(2))(conv_4)
+conv_5 = TimeDistributed(SeparableConv2D(64, (3,3), activation='relu'))(max_p2)
+conv_6 = TimeDistributed(SeparableConv2D(128, (3,3), activation='relu'))(conv_5)
 gap    = TimeDistributed(GlobalAveragePooling2D())(conv_6)
-
 blstm_1   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = True  ))(gap)
 blstm_2   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = False ))(blstm_1)
 Dense_2   = Dense(256, activation = 'sigmoid' )(blstm_2)
