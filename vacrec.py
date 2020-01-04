@@ -12,7 +12,7 @@ from keras import optimizers
 import keras
 from keras.models import Input,Model,InputLayer
 from keras.layers import Dense, Dropout, Flatten, TimeDistributed
-from keras.layers import SeparableConv2D,Conv1D,Conv2D,Conv3D, MaxPooling1D, MaxPooling2D, MaxPooling3D, GlobalAveragePooling1D
+from keras.layers import SeparableConv2D,Conv1D,Conv2D,GlobalAveragePooling2D,MaxPooling2D
 from keras.applications import VGG16
 from keras.models import model_from_json
 from keras.models import load_model
@@ -58,28 +58,32 @@ X.shape
 print(np.shape(X))
 X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size=0.2 ,random_state=43)
 
-batch_size = 32
+batch_size = 2
 epochs = 120
 
-begin = keras.Input(shape=(15, 224, 224, 3), name='begin')
-#begin  = Input(shape = (X.shape[1], X.shape[2], X.shape[3], X.shape[4]))
-conv_1 = Conv3D(32, (3,3,3), activation='relu')(begin)
-conv_2 = Conv3D(64, (3,3,3), activation='relu')(conv_1)
-conv_3 = Conv3D(64, (3,3,3), activation='relu')(conv_2)
-conv_4 = Conv3D(128, (3,3,3), activation='relu')(conv_3)
-conv_5 = Conv3D(64, (3,3,3), activation='relu')(conv_4)
-conv_6 = Conv3D(128, (3,3,3), activation='relu')(conv_5)
+
+video = keras.Input(shape = (X.shape[1], X.shape[2] , X.shape[3] , X.shape[4]), name='video')
+conv_1 = TimeDistributed(Conv2D(32, (3,3), activation='relu'))(video)
+conv_2 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_1)
+conv_3 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_2)
+conv_4 = TimeDistributed(Conv2D(128, (3,3), activation='relu'))(conv_3)
+conv_5 = TimeDistributed(Conv2D(64, (3,3), activation='relu'))(conv_4)
+conv_6 = TimeDistributed(Conv2D(128, (3,3), activation='relu'))(conv_5)
+gap    = TimeDistributed(GlobalAveragePooling2D())(conv_6)
+
+blstm_1   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = True  ))(gap)
+blstm_2   = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5, return_sequences = False ))(blstm_1)
+Dense_2   = Dense(256, activation = 'sigmoid' )(blstm_2)
+batchNorm = BatchNormalization()(Dense_2)
+enver   = Dense(32, activation = 'sigmoid')(batchNorm)
+batchNorm2= BatchNormalization()(enver)
+Dense_3   = Dense(4, activation='sigmoid')(batchNorm2)
+model = keras.models.Model(input = video , output = Dense_3)
 print(model.summary())
 
-'''
-#flatten= Flatten()(conv_6)
-Dense  = layers.TimeDistributed(Dense(2048, activation = 'sigmoid'))(conv_6)
-#cnn    = Model(input = begin, output = Dense)
-#blstm_1 = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5), return_sequences =True)(cnn)
-#blstm_2 = Bidirectional(LSTM(1024, dropout=0.1, recurrent_dropout=0.5), return_sequences =False)(blstm_1)
-Dense_3 = Dense(4, activation = 'sigmoid')(dense)
-model = Model(input = begin, output = Dense_3)
-print(model.summary())
+
+from keras.optimizers import SGD
+sgd = SGD(lr=0.01, decay = 1e-3, momentum=0.9, nesterov=True)
 
 model.compile(loss = 'binary_crossentropy',  optimizer=sgd, metrics=['accuracy'])
 history = model.fit(X_train, Y_train, shuffle=True, batch_size=batch_size,epochs=epochs,verbose=1, validation_data=(X_valid, Y_valid) )
@@ -112,6 +116,3 @@ plt.ylabel('loss' , fontsize=20)
 plt.xlabel('epoch' , fontsize=20)
 plt.legend( ['train', 'validation'], loc='upper left')
 plt.show()
-
-
-'''
