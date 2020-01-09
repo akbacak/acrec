@@ -57,7 +57,8 @@ self.generator = VideoGenerator(train_dir="/home/ubuntu/keras/enver/acrec/data/t
                                 dims=(10, 224, 224, 3),
                                 batch_size=16,
                                 shuffle=True,
-                                file_ext=".np*")
+                                file_ext="np*" #".np*"
+                                )
 
 self.training_generator = self.generator.generate(train_or_test='train')
 self.training_steps_per_epoch = len(self.generator.filenames_train) // self.batch_size
