@@ -11,7 +11,7 @@ for file in listing:
     train_val_dir  = os.listdir("/home/ubuntu/keras/enver/acrec/videos/" + file + "/" )   
     for file_2 in train_val_dir:
        class_dir = os.listdir("/home/ubuntu/keras/enver/acrec/videos/" + file + "/" + file_2 + "/") 
-       os.makedirs("/home/ubuntu/keras/enver/acrec/NPY_files/" + file + "/" + file_2 )
+       os.makedirs("/home/ubuntu/keras/enver/acrec/data/" + file + "/" + file_2 )
        for videos in class_dir:
            cap = cv2.VideoCapture("/home/ubuntu/keras/enver/acrec/videos/" + file + "/" + file_2 + "/" + videos)
            os.makedirs("/home/ubuntu/keras/enver/acrec/Frames/" + file + "/" + file_2 + "/" + videos)
@@ -40,8 +40,6 @@ for file in listing:
                frame =  plt.imread("/home/ubuntu/keras/enver/acrec/Frames/" + file +"/" + file_2 + "/" + videos +"/" + im)
                X.append (im)
            X = np.array(X)
-           np.save(open("/home/ubuntu/keras/enver/acrec/NPY_files/" + file + "/" + file_2 + "/" + videos + ".npy", 'w'), X)
-
-
+           np.save(open("/home/ubuntu/keras/enver/acrec/data/" + file + "/" + file_2 + "/" + videos + ".npy", 'w'), X)
 
 

@@ -32,5 +32,5 @@ for file in listing:
                success = getFrame(sec)
 
 
-os.system('resize.sh')
+os.system('sh resize.sh')
 
