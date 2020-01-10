@@ -1,3 +1,4 @@
+#In addition to v3, also creates a *.npy file for each video (video's frames), and save them to respective data's subfolders
 import os
 import math
 import cv2
@@ -38,7 +39,7 @@ for file in listing:
            frame_dir = os.listdir("/home/ubuntu/keras/enver/acrec/Frames/" + file +"/" + file_2 + "/" + videos +"/")
            for im in frame_dir:
                frame =  plt.imread("/home/ubuntu/keras/enver/acrec/Frames/" + file +"/" + file_2 + "/" + videos +"/" + im)
-               X.append (im)
+               X.append (frame)
            X = np.array(X)
            np.save(open("/home/ubuntu/keras/enver/acrec/data/" + file + "/" + file_2 + "/" + videos + ".npy", 'w'), X)
 
